@@ -75,7 +75,7 @@ jobs:
       # 8. Test: run the automated tests (Vitest, added in phase 1)
       - name: Test
         if: hashFiles('pnpm-lock.yaml') != ''
-        run: pnpm run --if-present test
+        run: pnpm run --if-present test:coverage
 
       # 9. Build: does the production build actually succeed?
       - name: Build
