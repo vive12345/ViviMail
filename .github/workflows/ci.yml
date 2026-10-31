@@ -1,0 +1,78 @@
+# ─────────────────────────────────────────────────────────────
+# CI — Continuous Integration
+# Checks that the code installs, passes lint, type-checks,
+# passes tests and builds. Runs on every PR and push.
+# ─────────────────────────────────────────────────────────────
+
+name: CI # Name shown in the GitHub "Actions" tab and on PRs
+
+on: # WHEN this workflow runs
+  pull_request: # ...when a PR is opened or updated
+    branches: [main, develop] #    and it targets main or develop
+  push: # ...when commits land directly on
+    branches: [main, develop] #    main or develop (e.g. after a merge)
+
+concurrency: # Avoid wasted runs
+  group: ${{ github.workflow }}-${{ github.ref }} # One "slot" per workflow + branch
+  cancel-in-progress: true # New push → cancel the older, now-outdated run
+
+permissions: # SECURITY: least privilege
+  contents: read # This workflow can only READ the repo, never write
+
+jobs:
+  check: # Job ID (internal name)
+    name: Lint, typecheck, test, build # Name shown on GitHub
+    runs-on: ubuntu-latest # Fresh Linux machine, deleted after the run
+    timeout-minutes: 15 # Kill it if stuck, so it doesn't burn free minutes
+
+    steps:
+      # 1. Download the repo's code onto the machine
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Until the monorepo exists (phase 1), there's nothing to check.
+      #    hashFiles() returns '' when the file doesn't exist.
+      - name: Skip notice (no project yet)
+        if: hashFiles('pnpm-lock.yaml') == ''
+        run: echo "No pnpm-lock.yaml yet, skipping checks until the monorepo is set up."
+
+      # 3. Install pnpm. The version is read from "packageManager" in package.json
+      - name: Set up pnpm
+        if: hashFiles('pnpm-lock.yaml') != ''
+        uses: pnpm/action-setup@v4
+
+      # 4. Install Node.js 22 (LTS) and cache downloaded packages between runs
+      - name: Set up Node
+        if: hashFiles('pnpm-lock.yaml') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      # 5. Install exactly the versions in pnpm-lock.yaml.
+      #    --frozen-lockfile FAILS if package.json and the lockfile disagree,
+      #    which catches "works on my machine" problems.
+      - name: Install dependencies
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm install --frozen-lockfile
+
+      # 6. Lint: code style and common mistakes (fastest check first)
+      #    --if-present: skip quietly if the script isn't defined yet
+      - name: Lint
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm run --if-present lint
+
+      # 7. Typecheck: TypeScript errors (wrong types, typos in names)
+      - name: Typecheck
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm run --if-present typecheck
+
+      # 8. Test: run the automated tests (Vitest, added in phase 1)
+      - name: Test
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm run --if-present test
+
+      # 9. Build: does the production build actually succeed?
+      - name: Build
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm run --if-present build

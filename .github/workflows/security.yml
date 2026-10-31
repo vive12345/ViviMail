@@ -1,0 +1,46 @@
+# ─────────────────────────────────────────────────────────────
+# Security — secret scanning
+# Fails if any commit contains something that looks like a
+# password, API key, token or private key.
+# ─────────────────────────────────────────────────────────────
+
+name: Security
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # Read-only, same as CI
+
+jobs:
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Download the code WITH full history.
+      # Normally checkout grabs only the latest commit. fetch-depth: 0
+      # grabs ALL commits, because a key added in one commit and deleted
+      # in the next is still in the history, and still leaked.
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # gitleaks checks every commit against 150+ patterns:
+      # AWS keys, Google OAuth secrets, OpenAI/Anthropic keys, GitHub
+      # tokens, private keys, passwords in URLs, etc.
+      # GITHUB_TOKEN is a temporary token GitHub creates for each run;
+      # gitleaks uses it to comment on the PR if it finds something.
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
