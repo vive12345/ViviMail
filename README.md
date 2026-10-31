@@ -21,13 +21,13 @@ cp .env.example .env    # fill in values, never commit .env
 
 ### Branches
 
-| Branch | Purpose |
-|---|---|
-| `main` | Production-ready code. No direct pushes. |
-| `develop` | Integration branch; feature work merges here. |
-| `feature/<name>` | New features |
-| `bugfix/<name>` | Bug fixes |
-| `hotfix/<name>` | Urgent production fixes, branched from `main` |
+| Branch           | Purpose                                       |
+| ---------------- | --------------------------------------------- |
+| `main`           | Production-ready code. No direct pushes.      |
+| `develop`        | Integration branch; feature work merges here. |
+| `feature/<name>` | New features                                  |
+| `bugfix/<name>`  | Bug fixes                                     |
+| `hotfix/<name>`  | Urgent production fixes, branched from `main` |
 
 Flow: `feature/*` → PR → `develop` → PR → `main`
 
