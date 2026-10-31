@@ -56,6 +56,11 @@ jobs:
         if: hashFiles('pnpm-lock.yaml') != ''
         run: pnpm install --frozen-lockfile
 
+      # 5.1 Format check: ensure code is properly formatted (e.g., Prettier)
+      - name: Format check
+        if: hashFiles('pnpm-lock.yaml') != ''
+        run: pnpm run --if-present format:check
+
       # 6. Lint: code style and common mistakes (fastest check first)
       #    --if-present: skip quietly if the script isn't defined yet
       - name: Lint
