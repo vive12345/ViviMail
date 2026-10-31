@@ -31,3 +31,15 @@ docs/
 mkdocs.yml
 requirements-docs.txt
 .github/workflows/deploy-docs.yml
+
+# Node / monorepo
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.react-router/
+*.local
+
+# AWS CDK (phase 2)
+cdk.out/
