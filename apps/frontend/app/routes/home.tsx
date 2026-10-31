@@ -1,5 +1,6 @@
+import { Link } from "react-router";
+import { buttonVariants } from "~/components/ui/button";
 import type { Route } from "./+types/home";
-import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 
 export const meta: Route.MetaFunction = () => [
@@ -16,7 +17,9 @@ export default function Home() {
           <CardDescription>AI-powered email client. Early development.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button className="w-full">Sign in with Google</Button>
+          <Link to="/mail/inbox" className={buttonVariants({ className: "w-full" })}>
+            Open inbox (demo)
+          </Link>
         </CardContent>
       </Card>
     </main>
