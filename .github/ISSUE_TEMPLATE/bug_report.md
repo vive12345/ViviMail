@@ -7,9 +7,11 @@ assignees: ""
 ---
 
 ## Description
+
 <!-- What's wrong? -->
 
 ## Steps to Reproduce
+
 1.
 2.
 3.
@@ -19,6 +21,7 @@ assignees: ""
 ## Actual Behavior
 
 ## Environment
+
 - OS:
 - Browser:
 - Node version:
